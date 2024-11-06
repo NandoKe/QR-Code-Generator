@@ -49,22 +49,39 @@
 
         .color-picker {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: flex-start;
             margin-bottom: 15px;
         }
 
+        .color-preview {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .color-preview div {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .color-preview .navy { background-color: #001155; }
+        .color-preview .white { background-color: #FFFFFF; border: 1px solid #ccc; }
+        .color-preview .gray { background-color: #333333; }
+        .color-preview .horizon { background-color: #eef3f6; border: 1px solid #ccc; }
+
         .color-picker label {
             font-size: 14px;
-            flex: 1;
-            text-align: left;
-            margin-top: 12px;
+            margin-top: 10px;
             color: #555;
         }
 
         .color-picker input[type="color"] {
             width: 40px;
             height: 40px;
-            margin-left: 10px;
             border: none;
             padding: 0;
             cursor: pointer;
@@ -102,128 +119,94 @@
         #download-btn button:hover {
             background-color: #218838;
         }
-
-        label[for="toggle-email"] {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        label[for="toggle-padding"], label[for="toggle-background"] {
-            margin-top: 10px;
-            display: block;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            button {
-                font-size: 14px;
-                padding: 10px 15px;
-            }
-
-            .color-picker input[type="color"] {
-                width: 30px;
-                height: 30px;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>QR Code Generator</h1>
+<div class="container">
+    <h1>QR Code Generator</h1>
 
-        <label for="toggle-email">
-            <input type="checkbox" id="toggle-email"> E-Mail-Adresse verwenden
-        </label>
+    <label for="toggle-email">
+        <input type="checkbox" id="toggle-email"> E-Mail-Adresse verwenden
+    </label>
 
-        <input type="text" id="text" placeholder="Gib eine URL ein">
-        <input type="email" id="email" placeholder="Gib eine E-Mail-Adresse ein" style="display: none;">
+    <input type="text" id="text" placeholder="Gib eine URL ein">
+    <input type="email" id="email" placeholder="Gib eine E-Mail-Adresse ein" style="display: none;">
 
-        <div class="color-picker">
-            <label for="foregroundColor">Vordergrund:</label>
-            <input type="color" id="foregroundColor" value="#000000">
-            <label for="backgroundColor">Hintergrund:</label>
-            <input type="color" id="backgroundColor" value="#ffffff" disabled>
-            <label>
-                <input type="checkbox" id="toggle-background"> Hintergrund anzeigen
-            </label>
+    <div class="color-picker">
+        <label for="foregroundColor">Vordergrund:</label>
+        <div class="color-preview">
+            <div class="navy" onclick="setColor('#001155')"></div>
+            <div class="white" onclick="setColor('#FFFFFF')"></div>
+            <div class="gray" onclick="setColor('#333333')"></div>
+            <div class="horizon" onclick="setColor('#eef3f6')"></div>
         </div>
-
-        <label for="toggle-padding">
-            <input type="checkbox" id="toggle-padding"> QR-Code mit Rand
-        </label>
-
-        <button onclick="generateQRCode()">QR Code generieren</button>
-
-        <div id="qrcode"></div>
-
-        <a id="download-btn" download="qrcode.svg">
-            <button>QR Code herunterladen</button>
-        </a>
+        <input type="color" id="foregroundColor" value="#000000">
     </div>
 
-    <!-- QRCode Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <label for="toggle-padding">
+        <input type="checkbox" id="toggle-padding"> QR-Code mit Rand
+    </label>
 
-    <script>
-        document.getElementById('toggle-email').addEventListener('change', function() {
-            const isEmailChecked = this.checked;
-            document.getElementById('text').style.display = isEmailChecked ? 'none' : 'block';
-            document.getElementById('email').style.display = isEmailChecked ? 'block' : 'none';
-        });
+    <button onclick="generateQRCode()">QR Code generieren</button>
 
-        document.getElementById('toggle-background').addEventListener('change', function() {
-            const backgroundInput = document.getElementById('backgroundColor');
-            backgroundInput.disabled = !this.checked;
-        });
+    <div id="qrcode"></div>
 
-        function generateQRCode() {
-            const qrContainer = document.getElementById('qrcode');
-            const isEmailChecked = document.getElementById('toggle-email').checked;
-            const text = isEmailChecked ? `mailto:${document.getElementById('email').value}` : document.getElementById('text').value;
-            const foregroundColor = document.getElementById('foregroundColor').value;
-            const hasBackground = document.getElementById('toggle-background').checked;
-            const backgroundColor = hasBackground ? document.getElementById('backgroundColor').value : null;
-            const includePadding = document.getElementById('toggle-padding').checked;
+    <a id="download-btn" download="qrcode.svg">
+        <button>QR Code herunterladen</button>
+    </a>
+</div>
 
-            if (text) {
-                qrContainer.innerHTML = '';  // Löscht vorherige QR-Codes
+<!-- QRCode Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 
-                QRCode.toString(text, {
-                    type: 'svg',
-                    margin: includePadding ? 4 : 0,  // Padding hinzufügen, wenn ausgewählt
-                    color: {
-                        dark: foregroundColor,
-                        light: backgroundColor || '#0000'  // Transparent, falls kein Hintergrund
-                    }
-                }, function (error, svg) {
-                    if (error) {
-                        console.error(error);
-                        return;
-                    }
-                    qrContainer.innerHTML = svg;
+<script>
+    document.getElementById('toggle-email').addEventListener('change', function() {
+        const isEmailChecked = this.checked;
+        document.getElementById('text').style.display = isEmailChecked ? 'none' : 'block';
+        document.getElementById('email').style.display = isEmailChecked ? 'block' : 'none';
+    });
 
-                    // Download-Button sichtbar machen und SVG als Download setzen
-                    const downloadBtn = document.getElementById('download-btn');
-                    const svgBlob = new Blob([svg], { type: 'image/svg+xml' });
-                    const url = URL.createObjectURL(svgBlob);
-                    downloadBtn.href = url;
-                    downloadBtn.style.display = 'inline-block';
-                });
-            } else {
-                alert('Bitte gib eine gültige URL oder E-Mail-Adresse ein');
-            }
+    function setColor(color) {
+        document.getElementById('foregroundColor').value = color;
+    }
+
+    function generateQRCode() {
+        const qrContainer = document.getElementById('qrcode');
+        const isEmailChecked = document.getElementById('toggle-email').checked;
+        const text = isEmailChecked ? `mailto:${document.getElementById('email').value}` : document.getElementById('text').value;
+        const foregroundColor = document.getElementById('foregroundColor').value;
+        const includePadding = document.getElementById('toggle-padding').checked;
+
+        if (text) {
+            qrContainer.innerHTML = '';  // Löscht vorherige QR-Codes
+
+            QRCode.toString(text, {
+                type: 'svg',
+                margin: includePadding ? 4 : 0,  // Padding hinzufügen, wenn ausgewählt
+                color: {
+                    dark: foregroundColor,
+                    light: '#0000'  // Transparenter Hintergrund
+                }
+            }, function (error, svg) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                qrContainer.innerHTML = svg;
+
+                // Download-Button sichtbar machen und SVG als Download setzen
+                const downloadBtn = document.getElementById('download-btn');
+                const svgBlob = new Blob([svg], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(svgBlob);
+                downloadBtn.href = url;
+                downloadBtn.style.display = 'inline-block';
+            });
+        } else {
+            alert('Bitte gib eine gültige URL oder E-Mail-Adresse ein');
         }
-    </script>
+    }
+</script>
 
 </body>
 </html>
